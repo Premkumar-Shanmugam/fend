@@ -17,15 +17,22 @@ body{
 }
 
 .holder{
+    display: flex;
+    padding: 1rem;
+}
 
+.feel, .zip{
+    display: flex;
 }
 
 .entry{
+    display: flex;
+    flex-direction: column;
     background: rgba(59, 74, 107, .4);
 }
 
 #entryHolder{
-
+    border: #444 1px solid;
 }
 
 #date{
@@ -41,10 +48,10 @@ body{
 }
 
 .headline {
-
+    font-size: 3rem;
 }
 .title{
-
+    font-style: italic;
 }
 
 /*  Basic Styling To Override Default For Basic HTML Elements */
