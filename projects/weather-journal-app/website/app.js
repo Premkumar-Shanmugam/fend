@@ -10,19 +10,30 @@ let newDate = d.getMonth()+1+'.'+ d.getDate()+'.'+ d.getFullYear();
 const getWeather = async (baseUrl='', appid='', zip='') => {
 
     const url = baseUrl + '?zip=' + zip + '&appid=' + appid
+    let temperature = ''
 
     const response = await fetch(url);
 
-    try {
-        const weatherData = await response.json();
-        return weatherData;
-    } catch (error) {
-        console.log(error);
+    const data = await response.json();
+
+    if (response.ok) {
+        temperature = data.main?.temp ?? 'Unknown'
+    } else {
+        temperature = 'Sorry. ' + data.message
     }
+
+    return temperature
 }
 
 // function to post weather data
-const postWeather = async (url='', data={}) => {
+const postWeather = async (url='', temperature) => {
+
+    const userResponse = document.getElementById('feelings').value;
+    const weatherData = {
+        temperature: temperature,
+        date: newDate,
+        userResponse: userResponse,
+    }
 
     const response = await fetch(url, {
         method: 'POST',
@@ -30,14 +41,14 @@ const postWeather = async (url='', data={}) => {
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(weatherData)
     });
 
-    try {
-        const newData = await response.json();
-        return newData;
-    } catch (error) {
-        console.log(error);
+    const newData = await response.json();
+    if (response.ok) {
+        return newData
+    } else {
+        throw new Error('Post failed!')
     }
 }
 
@@ -52,12 +63,19 @@ const retrieveWeather = async (url='') => {
         },
     });
 
-    try {
-        const projectData = await response.json();
-        return projectData;
-    } catch (error) {
-        console.log(error);
+    return response.json();
+}
+
+// function to show weather data
+const showWeather = (data) => {
+    document.getElementById('date').innerText = data.date;
+    if (isNaN(data.temperature)) {
+        temp = data.temperature
+    } else {
+        temp = Math.round(data.temperature)+ ' degrees'
     }
+    document.getElementById('temp').innerText = temp
+    document.getElementById('content').innerText = data.userResponse;
 }
 
 document.getElementById('generate').addEventListener('click', processRequest);
@@ -66,20 +84,18 @@ function processRequest() {
     
     const zip = document.getElementById('zip').value;
     
-    getWeather(baseURL, apiKey, zip).then((data) => {    
-        const userResponse = document.getElementById('feelings').value;
-        const weatherData = {
-            temperature: data.main.temp,
-            date: newDate,
-            userResponse: userResponse,
-        }
-        postWeather(url='/data', weatherData).then((data) => {
+    getWeather(baseURL, apiKey, zip).then((temperature) => {
+        postWeather(url='/data', temperature).then((newData) => {
+            console.log(newData)
             retrieveWeather(url='/data').then((data) => {
-                console.log(data);
-                document.getElementById('date').innerText = data.date;
-                document.getElementById('temp').innerText = Math.round(data.temperature)+ ' degrees'
-                document.getElementById('content').innerText = data.userResponse;
-            });
+                showWeather(data)
+            }).catch((error) => {
+                console.log('Retrieve Weather Error:', error)
+            })
+        }).catch((error) => {
+            console.log('Post Weather Error:', error)
         })
+    }).catch((error) => {
+        console.log('Get Weather Error:', error)
     })
 }

@@ -40,7 +40,7 @@ function addData(req, res) {
     }
     
     const response = {
-        message: 'Weather data added successfully!'
+        message: 'Weather data posted successfully!'
     }
     res.status = 200;
     res.send(response);
