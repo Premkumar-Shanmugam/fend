@@ -1,16 +1,42 @@
 function handleSubmit(event) {
+    const Polarity = {
+        'P+': 'STRONG POSITIVE',
+        'P': 'POSITIVE',
+        'NEU': 'NEUTRAL',
+        'N': 'NEGATIVE',
+        'N+': 'STRONG NEGATIVE',
+        'NONE': 'WITHOUT POLARITY',
+    }
+
     event.preventDefault()
 
-    // check what text was put into the form field
-    let formText = document.getElementById('name').value
-    checkForName(formText)
+    document.getElementById('results').innerHTML = '<br />Analysing...'
 
-    console.log("::: Form Submitted :::")
-    fetch('http://localhost:8080/test')
-    .then(res => res.json())
-    .then(function(res) {
-        document.getElementById('results').innerHTML = res.message
-    })
+    //get url data from UI
+    let url = document.getElementById('url').value
+    if (Client.isValidUrl(url)) { 
+        fetch(`http://localhost:8081/sentiment?url=${url}`)
+        .then(res => res.json())
+        .then(function(res) {
+            const result = ''
+            +  '<br /> Polarity: ' +  Polarity[res.polarity]
+            +  '<br /> Subjectivity: ' +  res.subjectivity
+            +  '<br /> Agreement: ' +  res.agreement
+            +  '<br /> Confidence: ' +  res.confidence
+            +  '<br /> Irony: ' +  res.irony
+
+            document.getElementById('results').innerHTML = result
+        })
+    } else {
+        document.getElementById('results').innerHTML = ''
+    }
 }
 
-export { handleSubmit }
+function onBlur(){
+    document.getElementById('results').innerHTML = ''
+    //get url data from UI
+    let url = document.getElementById('url').value
+    Client.isValidUrl(url)
+}
+
+export { handleSubmit, onBlur }
