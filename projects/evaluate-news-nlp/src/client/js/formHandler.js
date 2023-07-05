@@ -14,7 +14,7 @@ function handleSubmit(event) {
 
     //get url data from UI
     let url = document.getElementById('url').value
-    if (Client.isValidUrl(url)) { 
+    if (Client.isValidUrl(url)) {
         fetch(`http://localhost:8081/sentiment?url=${url}`)
         .then(res => res.json())
         .then(function(res) {
